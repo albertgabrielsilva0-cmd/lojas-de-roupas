@@ -1,40 +1,31 @@
 // ===================== CONFIGURAÇÃO — edite aqui =====================
 const CONFIG = {
-  marca: "Studio Lumina",
-  instagram: "studi_olumina", // perfil que recebe os pedidos no Direct (sem @)
-  prazoDias: 3,            // prazo de entrega em dias
-  metaPixelId: "",         // ID do Pixel da Meta (Facebook/Instagram Ads)
+  marca: "Studio Lumina IA",
+  whatsapp: "5516994184633",     // número que recebe os pedidos (DDI + DDD + número)
+  instagram: "studi_olumina",    // perfil mostrado no rodapé (sem @)
+  prazoDias: 3,                  // prazo de entrega em dias
+  metaPixelId: "",               // ID do Pixel da Meta (Facebook/Instagram Ads)
   pacotes: [
-    {
-      nome: "Lembrança",
-      sub: "Para começar a guardar essa fase",
-      preco: null,         // ex.: 47  (null = "Consulte no Direct")
-      precoDe: null,       // preço riscado (opcional)
-      itens: ["5 fotos editadas", "1 cenário de estúdio", "Alta resolução para impressão"],
-    },
-    {
-      nome: "Ensaio Completo",
-      sub: "O ensaio para emoldurar e presentear",
-      destaque: "Recomendado",
-      preco: null,
-      precoDe: null,
-      itens: ["15 fotos editadas", "3 cenários: estúdio, close de rosto e temático", "Alta resolução para impressão", "Ajustes inclusos"],
-    },
-    {
-      nome: "Irmãos",
-      sub: "Para registrar os pequenos juntos",
-      preco: null,
-      precoDe: null,
-      itens: ["Até 2 crianças", "20 fotos editadas", "Fotos individuais e juntos", "Alta resolução para impressão", "Ajustes inclusos"],
-    },
+    { nome: "Express", fotos: 3, preco: 14.9,
+      desc: "Ideal para quem quer testar ou criar algumas fotos novas para o perfil e as redes sociais." },
+    { nome: "Essencial", fotos: 5, preco: 19.9,
+      desc: "Perfeito para quem quer um mini ensaio com mais opções de pose, enquadramento e cenário." },
+    { nome: "Completo", fotos: 10, preco: 39.9, destaque: true, selo: "Recomendado",
+      desc: "Ideal para quem quer várias imagens para postar, emoldurar e montar um ensaio mais completo." },
+    { nome: "Premium", fotos: 25, preco: 69.9, selo: "Mais completo", porFoto: true,
+      desc: "Nosso pacote mais completo, com mais variedade de estilos, cenários, poses e resultados." },
+  ],
+  inclusos: [
+    "Fotos criadas com IA a partir das suas referências",
+    "Cenários e estilos personalizados",
+    "Você escolhe o tema das fotos",
+    "Entrega pelo WhatsApp",
   ],
 };
 // =====================================================================
 
-const brl = (n) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: n % 1 ? 2 : 0 });
-
-// ig.me opens the profile's Direct straight away (inside the Instagram app too)
-const dmLink = () => `https://ig.me/m/${CONFIG.instagram}`;
+const brl = (n) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const waLink = (msg) => `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`;
 const profileLink = () => `https://www.instagram.com/${CONFIG.instagram}/`;
 
 function el(tag, cls, text) {
@@ -49,24 +40,19 @@ function renderPackages() {
   const box = document.getElementById("packages");
   CONFIG.pacotes.forEach((p) => {
     const card = el("div", "pack" + (p.destaque ? " featured" : ""));
-    if (p.destaque) card.appendChild(el("span", "pack-flag", p.destaque));
-    card.appendChild(el("h3", null, p.nome));
-    card.appendChild(el("p", "pack-sub", p.sub));
-    if (p.preco != null) {
-      if (p.precoDe != null) card.appendChild(el("div", "pack-old", "de " + brl(p.precoDe)));
-      const price = el("div", "pack-price", brl(p.preco));
-      card.appendChild(price);
-    } else {
-      card.appendChild(el("div", "pack-consult", "Consulte no Direct"));
-    }
-    const ul = el("ul");
-    p.itens.forEach((i) => ul.appendChild(el("li", null, i)));
-    card.appendChild(ul);
-    const btn = el("a", "btn " + (p.destaque ? "btn-dm" : "btn-ghost"), "Quero o pacote " + p.nome);
-    btn.dataset.dm = `Olá! Quero o pacote ${p.nome} do ensaio de Dia das Crianças.`;
+    if (p.selo) card.appendChild(el("span", "pack-flag" + (p.destaque ? "" : " soft"), p.selo));
+    card.appendChild(el("h3", null, "Pacote " + p.nome));
+    card.appendChild(el("p", "pack-count", `${p.fotos} fotos com IA`));
+    card.appendChild(el("div", "pack-price", brl(p.preco)));
+    if (p.porFoto) card.appendChild(el("p", "pack-per", `sai ${brl(p.preco / p.fotos)} por foto`));
+    card.appendChild(el("p", "pack-desc", p.desc));
+    const btn = el("a", "btn " + (p.destaque ? "btn-wa" : "btn-ghost"), "Quero o " + p.nome);
+    btn.dataset.wa = `Olá! Quero o Pacote ${p.nome} (${p.fotos} fotos) do ensaio de Dia das Crianças.`;
     card.appendChild(btn);
     box.appendChild(card);
   });
+  const inc = document.getElementById("inclusos");
+  CONFIG.inclusos.forEach((i) => inc.appendChild(el("li", null, i)));
   document.getElementById("pack-note").textContent =
     `Entrega em até ${CONFIG.prazoDias} dias após o envio das fotos.`;
 }
@@ -129,44 +115,17 @@ function setupPixel() {
   fbq("track", "PageView");
 }
 
-// ----- Toast -----
-let toastTimer;
-function showToast(text) {
-  const t = document.getElementById("toast");
-  t.textContent = text;
-  t.hidden = false;
-  requestAnimationFrame(() => t.classList.add("show"));
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => {
-    t.classList.remove("show");
-    setTimeout(() => (t.hidden = true), 400);
-  }, 3500);
-}
-
-// ----- Checkout pelo Direct do Instagram + evento de Lead -----
-// The Direct link can't carry a pre-filled message, so the chosen package is
-// copied to the clipboard and the visitor just pastes it in the chat.
-function setupDirect() {
+// ----- Checkout pelo WhatsApp + evento de Lead -----
+function setupWhatsApp() {
   document.querySelectorAll("[data-ig-profile]").forEach((a) => {
     a.href = profileLink();
     a.target = "_blank";
     a.rel = "noopener";
   });
-  document.querySelectorAll("[data-dm]").forEach((a) => {
-    a.href = dmLink();
-    a.addEventListener("click", (e) => {
-      e.preventDefault();
-      const msg = a.dataset.dm;
-      if (window.fbq) fbq("track", "Lead", { content_name: msg });
-      const go = (copied) => {
-        showToast(copied ? "Mensagem copiada! É só colar no Direct." : `No Direct, mande: "${msg}"`);
-        setTimeout(() => (window.location.href = dmLink()), copied ? 900 : 1800);
-      };
-      try {
-        navigator.clipboard.writeText(msg).then(() => go(true), () => go(false));
-      } catch (err) {
-        go(false);
-      }
+  document.querySelectorAll("[data-wa]").forEach((a) => {
+    a.href = waLink(a.dataset.wa);
+    a.addEventListener("click", () => {
+      if (window.fbq) fbq("track", "Lead", { content_name: a.dataset.wa });
     });
   });
 }
@@ -202,6 +161,6 @@ renderPackages();
 setupCountdown();
 setupPlaceholders();
 setupPixel();
-setupDirect();
+setupWhatsApp();
 setupSticky();
 setupReveal();
