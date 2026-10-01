@@ -83,23 +83,29 @@ function setupCountdown() {
     : "Últimos pedidos para o Dia das Crianças";
 }
 
-// ----- Imagens ainda não enviadas viram um espaço reservado -----
+// ----- Fotos que ainda não existem somem, sem deixar buraco -----
 function setupPlaceholders() {
+  const gallerySection = document.getElementById("galeria");
+  const galleryItems = gallerySection.querySelectorAll(".g-item");
   document.querySelectorAll("img[data-ph]").forEach((img) => {
-    const mark = () => {
+    // lazy images offscreen never fire "error", so check them right away
+    img.loading = "eager";
+    const hide = () => {
       const box = img.parentElement;
-      if (img.hasAttribute("data-optional")) {
-        box.hidden = true;
-        const group = box.closest(".hero-visual, .compare");
-        if (box.classList.contains("snapshot")) group.querySelector(".arrow-note").hidden = true;
-        if (group.classList.contains("compare")) group.hidden = true;
-        return;
+      box.hidden = true;
+      if (box.classList.contains("arch")) {
+        box.closest(".hero-visual").hidden = true;
+        const inner = document.querySelector(".hero-inner");
+        inner.style.gridTemplateColumns = "1fr";
+        inner.style.maxWidth = "780px";
       }
-      box.classList.add("is-empty");
-      box.dataset.phLabel = "Foto: img/" + img.dataset.ph;
+      if (box.classList.contains("snapshot")) box.parentElement.querySelector(".arrow-note").hidden = true;
+      const compare = box.closest(".compare");
+      if (compare) compare.hidden = true;
+      if ([...galleryItems].every((g) => g.hidden)) gallerySection.hidden = true;
     };
-    if (img.complete && img.naturalWidth === 0) mark();
-    else img.addEventListener("error", mark, { once: true });
+    if (img.complete && img.naturalWidth === 0) hide();
+    else img.addEventListener("error", hide, { once: true });
   });
 }
 
