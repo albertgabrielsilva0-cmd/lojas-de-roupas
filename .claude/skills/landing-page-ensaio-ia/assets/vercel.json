@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/ensaio-dia-das-criancas/index.html" },
+    { "source": "/(.*)", "destination": "/ensaio-dia-das-criancas/$1" }
+  ]
+}
