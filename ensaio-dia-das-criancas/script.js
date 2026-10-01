@@ -9,9 +9,9 @@ const CONFIG = {
     { nome: "Completo", fotos: 10, preco: 39.9, destaque: true, selo: "Recomendado",
       vantagem: "Fotos para o quadro da sala, o álbum e o presente dos avós",
       desc: "O ensaio de verdade: várias poses e cenários para postar, emoldurar e guardar essa fase." },
-    { nome: "Premium", fotos: 25, preco: 69.9, selo: "Mais completo", porFoto: true,
+    { nome: "Premium", fotos: 25, preco: 69.9, selo: "Mais completo", porFoto: true, oculto: true,
       desc: "Nosso pacote mais completo, com mais variedade de estilos, cenários, poses e resultados." },
-    { nome: "Essencial", fotos: 5, preco: 19.9,
+    { nome: "Essencial", fotos: 5, preco: 19.9, oculto: true,
       desc: "Perfeito para quem quer um mini ensaio com mais opções de pose, enquadramento e cenário." },
     { nome: "Express", fotos: 3, preco: 14.9,
       desc: "Ideal para quem quer testar ou criar algumas fotos novas para o perfil e as redes sociais." },
@@ -39,7 +39,7 @@ function el(tag, cls, text) {
 // ----- Pacotes -----
 function renderPackages() {
   const box = document.getElementById("packages");
-  CONFIG.pacotes.forEach((p) => {
+  CONFIG.pacotes.filter((p) => !p.oculto).forEach((p) => {
     const card = el("div", "pack" + (p.destaque ? " featured" : ""));
     if (p.selo) card.appendChild(el("span", "pack-flag" + (p.destaque ? "" : " soft"), p.selo));
     card.appendChild(el("h3", null, "Pacote " + p.nome));
