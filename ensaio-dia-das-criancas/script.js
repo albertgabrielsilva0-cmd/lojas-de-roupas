@@ -6,7 +6,7 @@ const CONFIG = {
   prazoDias: 3,                  // prazo de entrega em dias
   metaPixelId: "",               // ID do Pixel da Meta (Facebook/Instagram Ads)
   pacotes: [
-    { nome: "Completo", fotos: 10, preco: 39.9, destaque: true, selo: "Recomendado",
+    { nome: "Completo", fotos: 10, preco: 29.9, destaque: true, selo: "Recomendado",
       vantagem: "Fotos para o quadro da sala, o álbum e o presente dos avós",
       desc: "O ensaio de verdade: várias poses e cenários para postar, emoldurar e guardar essa fase." },
     { nome: "Premium", fotos: 25, preco: 69.9, selo: "Mais completo", porFoto: true, oculto: true,
