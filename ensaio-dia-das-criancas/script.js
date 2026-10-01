@@ -1,14 +1,14 @@
 // ===================== CONFIGURAÇÃO — edite aqui =====================
 const CONFIG = {
-  marca: "Seu Estúdio",
-  whatsapp: "",            // só números, com DDI e DDD. Ex.: "5511999998888"
+  marca: "Studio Lumina",
+  instagram: "studi_olumina", // perfil que recebe os pedidos no Direct (sem @)
   prazoDias: 3,            // prazo de entrega em dias
   metaPixelId: "",         // ID do Pixel da Meta (Facebook/Instagram Ads)
   pacotes: [
     {
       nome: "Lembrança",
       sub: "Para começar a guardar essa fase",
-      preco: null,         // ex.: 47  (null = "Consulte no WhatsApp")
+      preco: null,         // ex.: 47  (null = "Consulte no Direct")
       precoDe: null,       // preço riscado (opcional)
       itens: ["5 fotos editadas", "1 cenário de estúdio", "Alta resolução para impressão"],
     },
@@ -33,10 +33,9 @@ const CONFIG = {
 
 const brl = (n) => n.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: n % 1 ? 2 : 0 });
 
-function waLink(msg) {
-  if (!CONFIG.whatsapp) return "#pacotes";
-  return `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`;
-}
+// ig.me opens the profile's Direct straight away (inside the Instagram app too)
+const dmLink = () => `https://ig.me/m/${CONFIG.instagram}`;
+const profileLink = () => `https://www.instagram.com/${CONFIG.instagram}/`;
 
 function el(tag, cls, text) {
   const e = document.createElement(tag);
@@ -58,13 +57,13 @@ function renderPackages() {
       const price = el("div", "pack-price", brl(p.preco));
       card.appendChild(price);
     } else {
-      card.appendChild(el("div", "pack-consult", "Consulte no WhatsApp"));
+      card.appendChild(el("div", "pack-consult", "Consulte no Direct"));
     }
     const ul = el("ul");
     p.itens.forEach((i) => ul.appendChild(el("li", null, i)));
     card.appendChild(ul);
-    const btn = el("a", "btn " + (p.destaque ? "btn-whats" : "btn-ghost"), "Quero o pacote " + p.nome);
-    btn.dataset.wa = `Olá! Quero o pacote ${p.nome} do ensaio de Dia das Crianças.`;
+    const btn = el("a", "btn " + (p.destaque ? "btn-dm" : "btn-ghost"), "Quero o pacote " + p.nome);
+    btn.dataset.dm = `Olá! Quero o pacote ${p.nome} do ensaio de Dia das Crianças.`;
     card.appendChild(btn);
     box.appendChild(card);
   });
@@ -130,13 +129,44 @@ function setupPixel() {
   fbq("track", "PageView");
 }
 
-// ----- Links de WhatsApp + evento de Lead -----
-function setupWhatsApp() {
-  document.querySelectorAll("[data-wa]").forEach((a) => {
-    a.href = waLink(a.dataset.wa);
-    if (CONFIG.whatsapp) { a.target = "_blank"; a.rel = "noopener"; }
-    a.addEventListener("click", () => {
-      if (window.fbq) fbq("track", "Lead", { content_name: a.dataset.wa });
+// ----- Toast -----
+let toastTimer;
+function showToast(text) {
+  const t = document.getElementById("toast");
+  t.textContent = text;
+  t.hidden = false;
+  requestAnimationFrame(() => t.classList.add("show"));
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    t.classList.remove("show");
+    setTimeout(() => (t.hidden = true), 400);
+  }, 3500);
+}
+
+// ----- Checkout pelo Direct do Instagram + evento de Lead -----
+// The Direct link can't carry a pre-filled message, so the chosen package is
+// copied to the clipboard and the visitor just pastes it in the chat.
+function setupDirect() {
+  document.querySelectorAll("[data-ig-profile]").forEach((a) => {
+    a.href = profileLink();
+    a.target = "_blank";
+    a.rel = "noopener";
+  });
+  document.querySelectorAll("[data-dm]").forEach((a) => {
+    a.href = dmLink();
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      const msg = a.dataset.dm;
+      if (window.fbq) fbq("track", "Lead", { content_name: msg });
+      const go = (copied) => {
+        showToast(copied ? "Mensagem copiada! É só colar no Direct." : `No Direct, mande: "${msg}"`);
+        setTimeout(() => (window.location.href = dmLink()), copied ? 900 : 1800);
+      };
+      try {
+        navigator.clipboard.writeText(msg).then(() => go(true), () => go(false));
+      } catch (err) {
+        go(false);
+      }
     });
   });
 }
@@ -167,10 +197,11 @@ function setupReveal() {
 
 document.querySelectorAll('[data-cfg="prazo"]').forEach((e) => (e.textContent = `${CONFIG.prazoDias} dias`));
 document.querySelectorAll('[data-cfg="marca"]').forEach((e) => (e.textContent = CONFIG.marca));
+document.querySelectorAll('[data-cfg="instagram"]').forEach((e) => (e.textContent = CONFIG.instagram));
 renderPackages();
 setupCountdown();
 setupPlaceholders();
 setupPixel();
-setupWhatsApp();
+setupDirect();
 setupSticky();
 setupReveal();
