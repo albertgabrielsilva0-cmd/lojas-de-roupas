@@ -85,8 +85,6 @@ function setupCountdown() {
 
 // ----- Fotos que ainda não existem somem, sem deixar buraco -----
 function setupPlaceholders() {
-  const gallerySection = document.getElementById("galeria");
-  const galleryItems = gallerySection.querySelectorAll(".g-item");
   document.querySelectorAll("img[data-ph]").forEach((img) => {
     // lazy images offscreen never fire "error", so check them right away
     img.loading = "eager";
@@ -102,11 +100,106 @@ function setupPlaceholders() {
       if (box.classList.contains("snapshot")) box.parentElement.querySelector(".arrow-note").hidden = true;
       const compare = box.closest(".compare");
       if (compare) compare.hidden = true;
-      if ([...galleryItems].every((g) => g.hidden)) gallerySection.hidden = true;
     };
     if (img.complete && img.naturalWidth === 0) hide();
     else img.addEventListener("error", hide, { once: true });
   });
+}
+
+// ----- Banner grande: troca as fotos sozinho, com setas, bolinhas e arrastar -----
+function setupBanner() {
+  const banner = document.getElementById("banner");
+  const section = document.getElementById("galeria");
+  const cap = document.getElementById("banner-cap");
+  const dotsBox = document.getElementById("banner-dots");
+  const INTERVAL = 4800;
+  const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  banner.style.setProperty("--dur", INTERVAL + "ms");
+  let slides = [...banner.querySelectorAll(".slide")];
+  let index = 0, timer = null, visible = false, hovering = false;
+
+  function buildDots() {
+    dotsBox.textContent = "";
+    slides.forEach((_, i) => {
+      const d = el("button", "banner-dot");
+      d.type = "button";
+      d.setAttribute("aria-label", `Ver foto ${i + 1} de ${slides.length}`);
+      d.addEventListener("click", () => go(i, true));
+      dotsBox.appendChild(d);
+    });
+  }
+
+  function show() {
+    slides.forEach((s, i) => s.classList.toggle("is-active", i === index));
+    [...dotsBox.children].forEach((d, i) => {
+      d.classList.remove("is-active");
+      if (i === index) { void d.offsetWidth; d.classList.add("is-active"); }
+    });
+    cap.classList.add("swap");
+    setTimeout(() => { cap.textContent = slides[index].dataset.cap; cap.classList.remove("swap"); }, 250);
+  }
+
+  function go(i, manual) {
+    if (!slides.length) return;
+    index = (i + slides.length) % slides.length;
+    show();
+    if (manual) restart();
+  }
+
+  function running() { return visible && !hovering && !calm && !document.hidden && slides.length > 1; }
+  function restart() {
+    clearInterval(timer);
+    banner.classList.toggle("paused", !running());
+    if (running()) timer = setInterval(() => go(index + 1), INTERVAL);
+  }
+
+  // a photo that fails to load leaves the rotation instead of showing a gap
+  slides.forEach((s) => {
+    const img = s.querySelector(".slide-img");
+    const drop = () => {
+      slides = slides.filter((x) => x !== s);
+      s.remove();
+      if (!slides.length) { section.hidden = true; clearInterval(timer); return; }
+      index = Math.min(index, slides.length - 1);
+      buildDots();
+      show();
+      restart();
+    };
+    if (img.complete && img.naturalWidth === 0) drop();
+    else img.addEventListener("error", drop, { once: true });
+  });
+
+  banner.querySelector(".banner-nav.prev").addEventListener("click", () => go(index - 1, true));
+  banner.querySelector(".banner-nav.next").addEventListener("click", () => go(index + 1, true));
+  banner.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowLeft") go(index - 1, true);
+    if (e.key === "ArrowRight") go(index + 1, true);
+  });
+  banner.addEventListener("mouseenter", () => { hovering = true; restart(); });
+  banner.addEventListener("mouseleave", () => { hovering = false; restart(); });
+  document.addEventListener("visibilitychange", restart);
+
+  let startX = null, startY = 0;
+  banner.addEventListener("pointerdown", (e) => {
+    if (e.target.closest("button")) return;
+    startX = e.clientX; startY = e.clientY;
+  });
+  banner.addEventListener("pointerup", (e) => {
+    if (startX === null) return;
+    const dx = e.clientX - startX, dy = e.clientY - startY;
+    startX = null;
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) go(index + (dx < 0 ? 1 : -1), true);
+  });
+  banner.addEventListener("pointercancel", () => { startX = null; });
+
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(([e]) => { visible = e.isIntersecting; restart(); }, { threshold: 0.35 }).observe(banner);
+  } else {
+    visible = true;
+  }
+  buildDots();
+  show();
+  restart();
 }
 
 // ----- Meta Pixel (só carrega se o ID estiver configurado) -----
@@ -150,7 +243,7 @@ function setupSticky() {
 
 // ----- Seções surgem suavemente ao rolar -----
 function setupReveal() {
-  const items = document.querySelectorAll(".section-head, .feel .wrap, .gallery, .compare, .steps li, .use, .pack, .trust-item, .faq, .final .wrap");
+  const items = document.querySelectorAll(".section-head, .feel .wrap, .banner, .compare, .steps li, .use, .pack, .trust-item, .faq, .final .wrap");
   if (!("IntersectionObserver" in window)) return;
   const io = new IntersectionObserver((entries) => {
     entries.forEach((e) => {
@@ -166,6 +259,7 @@ document.querySelectorAll('[data-cfg="instagram"]').forEach((e) => (e.textConten
 renderPackages();
 setupCountdown();
 setupPlaceholders();
+setupBanner();
 setupPixel();
 setupWhatsApp();
 setupSticky();

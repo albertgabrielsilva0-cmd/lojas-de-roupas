@@ -88,10 +88,15 @@
       <p>Festa, aniversário, outono, mundo doce, Natal: você escolhe o cenário e a gente cria um ensaio digno de quadro na parede.</p>
     </div>
 
-    <div class="gallery">
-      <figure class="g-item g-wide"><img src="img/festa.jpg" alt="Menino sorrindo de gravata borboleta em cenário de festa com balões" data-ph="festa.jpg" loading="lazy"><figcaption>Festa encantada</figcaption></figure>
-      <figure class="g-item"><img src="img/outono.jpg" alt="Menina de vestido vinho em sala decorada de outono" data-ph="outono.jpg" loading="lazy"><figcaption>Outono</figcaption></figure>
-      <figure class="g-item"><img src="img/doce.jpg" alt="Menina sorrindo ao lado de macarons gigantes" data-ph="doce.jpg" loading="lazy"><figcaption>Mundo doce</figcaption></figure>
+    <div class="banner" id="banner" role="region" aria-roledescription="carrossel" aria-label="Fotos de demonstração" tabindex="0">
+      <figure class="slide wide is-active" data-cap="Festa encantada" style="--pos: 72% 40%"><img class="slide-bg" src="img/festa.jpg" alt="" aria-hidden="true"><img class="slide-img" src="img/festa.jpg" alt="Menino sorrindo de gravata borboleta em cenário de festa com balões"></figure>
+      <figure class="slide portrait" data-cap="Aniversário" style="--pos: 50% 30%"><img class="slide-bg" src="img/hero.jpg" alt="" aria-hidden="true"><img class="slide-img" src="img/hero.jpg" alt="Menina assoprando a vela de 4 anos no bolo de aniversário"></figure>
+      <figure class="slide portrait" data-cap="Outono" style="--pos: 50% 40%"><img class="slide-bg" src="img/outono.jpg" alt="" aria-hidden="true"><img class="slide-img" src="img/outono.jpg" alt="Menina de vestido vinho em sala decorada de outono"></figure>
+      <figure class="slide portrait" data-cap="Mundo doce" style="--pos: 50% 30%"><img class="slide-bg" src="img/doce.jpg" alt="" aria-hidden="true"><img class="slide-img" src="img/doce.jpg" alt="Menina sorrindo ao lado de macarons gigantes"></figure>
+      <span class="banner-cap" id="banner-cap" aria-live="polite">Festa encantada</span>
+      <button class="banner-nav prev" type="button" aria-label="Foto anterior">&#8249;</button>
+      <button class="banner-nav next" type="button" aria-label="Próxima foto">&#8250;</button>
+      <div class="banner-dots" id="banner-dots"></div>
     </div>
 
     <div class="compare" data-optional>
