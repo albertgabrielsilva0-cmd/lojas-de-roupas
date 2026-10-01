@@ -6,14 +6,15 @@ const CONFIG = {
   prazoDias: 3,                  // prazo de entrega em dias
   metaPixelId: "",               // ID do Pixel da Meta (Facebook/Instagram Ads)
   pacotes: [
-    { nome: "Express", fotos: 3, preco: 14.9,
-      desc: "Ideal para quem quer testar ou criar algumas fotos novas para o perfil e as redes sociais." },
-    { nome: "Essencial", fotos: 5, preco: 19.9,
-      desc: "Perfeito para quem quer um mini ensaio com mais opções de pose, enquadramento e cenário." },
     { nome: "Completo", fotos: 10, preco: 39.9, destaque: true, selo: "Recomendado",
-      desc: "Ideal para quem quer várias imagens para postar, emoldurar e montar um ensaio mais completo." },
+      vantagem: "Fotos para o quadro da sala, o álbum e o presente dos avós",
+      desc: "O ensaio de verdade: várias poses e cenários para postar, emoldurar e guardar essa fase." },
     { nome: "Premium", fotos: 25, preco: 69.9, selo: "Mais completo", porFoto: true,
       desc: "Nosso pacote mais completo, com mais variedade de estilos, cenários, poses e resultados." },
+    { nome: "Essencial", fotos: 5, preco: 19.9,
+      desc: "Perfeito para quem quer um mini ensaio com mais opções de pose, enquadramento e cenário." },
+    { nome: "Express", fotos: 3, preco: 14.9,
+      desc: "Ideal para quem quer testar ou criar algumas fotos novas para o perfil e as redes sociais." },
   ],
   inclusos: [
     "Fotos criadas com IA a partir das suas referências",
@@ -45,6 +46,7 @@ function renderPackages() {
     card.appendChild(el("p", "pack-count", `${p.fotos} fotos com IA`));
     card.appendChild(el("div", "pack-price", brl(p.preco)));
     if (p.porFoto) card.appendChild(el("p", "pack-per", `sai ${brl(p.preco / p.fotos)} por foto`));
+    if (p.vantagem) card.appendChild(el("p", "pack-adv", p.vantagem));
     card.appendChild(el("p", "pack-desc", p.desc));
     const btn = el("a", "btn " + (p.destaque ? "btn-wa" : "btn-ghost"), "Quero o " + p.nome);
     btn.dataset.wa = `Olá! Quero o Pacote ${p.nome} (${p.fotos} fotos) do ensaio de Dia das Crianças.`;

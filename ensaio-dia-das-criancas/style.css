@@ -481,6 +481,16 @@ blockquote span { display: block; margin-top: 6px; font-size: 1.5em; }
 .pack-count { font-weight: 800; color: var(--rose); }
 .pack-price { font-family: var(--f-display); font-size: 2.5rem; line-height: 1.1; margin-top: 8px; font-variant-numeric: tabular-nums; }
 .pack-per { font-size: 0.88rem; color: var(--ink-soft); }
+.pack-adv {
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--blush);
+  color: var(--rose-deep);
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.4;
+}
 .pack-desc { flex: 1; margin: 14px 0 22px; font-size: 0.97rem; color: var(--ink-soft); line-height: 1.55; }
 .inclusos {
   display: grid;
